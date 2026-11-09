@@ -19,9 +19,9 @@ Traditionally, these groups rely on:
 - Paper notebooks that can get lost, torn, or altered.
 - Scattered WhatsApp group messages and screenshots buried in chats.
 - Verbal confirmations and manual mental calculations.
-- Disputed payout dates and lack of individual financial statements.
+- Disputed payout dates and lack of verifiable financial statements.
 
-**AdashiCircle** modernizes this cultural savings tradition through automation, mathematical accuracy, and transparent recordkeeping.
+**AdashiCircle** modernizes this cultural savings tradition through automation, mathematical accuracy, and transparent digital recordkeeping.
 
 ---
 
@@ -29,20 +29,21 @@ Traditionally, these groups rely on:
 
 ### 1. 100% Pure JavaScript Architecture
 - Built entirely in **JavaScript** (`.js` and `.jsx`) using Next.js 14 App Router, Tailwind CSS, and Shadcn UI primitives.
-- No TypeScript build overhead or complex type definitions.
+- Clean ES6+ code without TypeScript compile overhead or complex typing friction.
 
 ### 2. High-Precision Financial Engine (Zero Floating-Point Drift)
 - All monetary records are strictly stored as **integers in kobo** (`1 Naira = 100 kobo`).
-- Prevents binary floating-point rounding errors (`0.1 + 0.2 !== 0.3`).
-- Handles periodic contributions, outstanding balance tracking, late penalty rules, and rotational pool calculations.
+- Eliminates binary floating-point rounding errors (`0.1 + 0.2 !== 0.3`).
+- Handles periodic contributions, outstanding balance tracking, late penalty rules, and rotational pool calculations with exact integer arithmetic.
 
 ### 3. Three Supported Savings Models
 - **Rotational Savings (Traditional Ajo / Esusu)**: Members contribute fixed amounts each period; total accumulated pool is paid to one member per rotation based on assigned positions (#1 to #N).
-- **Target Goal Savings**: Group members contribute towards a shared milestone (e.g. bulk purchases, investments, family projects).
+- **Target Goal Savings**: Group members contribute towards a shared milestone (e.g. bulk market purchases, investments, family projects).
 - **Fixed-Term Cooperative**: Periodic contributions over a set period (e.g. 12 months) before total distributions and dividends.
 
 ### 4. Interactive Public Landing Page (`/`)
-- **Interactive Payout Calculator**: Real-time slider adjusting contribution amounts (₦5,000 to ₦200,000) and member counts (3 to 30) with dynamic cycle duration and pool sizing.
+- **Static, Professional Fintech Design**: Crisp, clean presentation without distracting animations or floating elements.
+- **Interactive Payout Calculator**: Real-time sliders adjusting contribution amounts (₦5,000 to ₦200,000) and member counts (3 to 30) with dynamic cycle duration and pool sizing.
 - **Why Not WhatsApp? Comparison**: Side-by-side breakdown contrasting paper/chat headaches against automated digital records.
 - **Savings Models Showcase**: Clear use-case guides for traders, friends, and corporate societies.
 - **Interactive FAQ Accordion**: Expandable answers explaining custody, proof verification, and statement generation.
@@ -183,7 +184,8 @@ AdashiCircle/
 │   └── middleware.js               # Edge middleware route guard
 ├── supabase/
 │   └── migrations/
-│       └── 001_initial_schema.sql  # 18-table PostgreSQL schema + triggers + RLS
+│       ├── 001_initial_schema.sql  # 18-table PostgreSQL schema + triggers + RLS
+│       └── 002_seed_data.sql       # Sample circle seed script
 ├── package.json
 └── README.md
 ```
@@ -221,13 +223,17 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_NAME=AdashiCircle
 ```
 
-> **Note on Instant Demo Mode**: If you run without connecting live Supabase keys, AdashiCircle automatically activates **Demo Mode**. You can click **"Instant Demo →"** on the login page or visit `/api/auth/demo` to explore the full platform with realistic mock data!
+> **Instant Demo Mode**: If you run without connecting live Supabase keys, AdashiCircle automatically activates **Demo Mode**. You can click **"Instant Demo →"** on the login page or visit `/api/auth/demo` to explore the full platform with realistic mock data immediately.
 
-### 4. Database Setup (Optional for Demo Mode, Required for Production)
+### 4. Database Setup (Supabase PostgreSQL)
 1. Create a project at [supabase.com](https://supabase.com).
 2. Open the **SQL Editor** in your Supabase dashboard.
 3. Paste the contents of [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql) and click **Run**.
-4. Copy your project URL, anon key, and service role key into `.env.local`.
+   - *This creates all 18 tables, triggers, RLS policies, and automatically grants Data API permissions with `NOTIFY pgrst, 'reload schema'`.*
+4. (Optional) Run [`supabase/migrations/002_seed_data.sql`](supabase/migrations/002_seed_data.sql) to populate sample circles (`Lagos SME Cooperative Circle`), rotation periods, and transactions.
+5. Copy your project URL, anon key, and service role key into `.env.local`.
+
+> **💡 Tip for Frictionless Local Testing**: In your Supabase Dashboard, go to **Authentication** → **Providers** → **Email**, and toggle off **Confirm email**. This allows new users created on `/register` to sign in instantly without needing to verify an email inbox.
 
 ### 5. Run Development Server
 ```bash
