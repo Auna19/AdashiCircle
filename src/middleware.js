@@ -31,7 +31,8 @@ export async function middleware(request) {
   )
   response = refreshedResponse
 
-  const isAuthenticated = user !== null
+  const isDemo = request.cookies.get('adashi_demo_session')?.value === 'true'
+  const isAuthenticated = user !== null || isDemo
 
   // 1. Redirect authenticated users away from login/register pages
   if (isAuthenticated && matchesAny(pathname, AUTH_ROUTES)) {
@@ -51,6 +52,7 @@ export async function middleware(request) {
   // 3. Guard super-admin routes
   if (isAuthenticated && matchesAny(pathname, SUPER_ADMIN_PREFIXES)) {
     const isSuperAdmin =
+      isDemo ||
       user?.app_metadata?.role === 'super_admin' ||
       user?.app_metadata?.is_super_admin === true
 

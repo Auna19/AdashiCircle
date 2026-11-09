@@ -31,12 +31,35 @@ const badgeVariants = cva(
   }
 )
 
+const statusVariants = {
+  default: 'default',
+  confirmed: 'confirmed',
+  active: 'confirmed',
+  completed: 'confirmed',
+  resolved: 'confirmed',
+  pending: 'pending',
+  pending_verification: 'pending',
+  overdue: 'overdue',
+  rejected: 'rejected',
+  failed: 'rejected',
+  cancelled: 'rejected',
+  upcoming: 'upcoming',
+  processing: 'processing',
+  partially_paid: 'partially_paid',
+}
+
 const statusDotColors = {
   default: 'bg-secondary-foreground',
   confirmed: 'bg-green-500',
+  active: 'bg-green-500',
+  completed: 'bg-green-500',
+  resolved: 'bg-green-500',
   pending: 'bg-amber-500',
+  pending_verification: 'bg-amber-500',
   overdue: 'bg-red-500',
   rejected: 'bg-red-500',
+  failed: 'bg-red-500',
+  cancelled: 'bg-red-500',
   upcoming: 'bg-blue-500',
   processing: 'bg-purple-500 animate-pulse',
   partially_paid: 'bg-orange-500',
@@ -45,9 +68,15 @@ const statusDotColors = {
 const statusLabels = {
   default: 'Unknown',
   confirmed: 'Confirmed',
+  active: 'Active',
+  completed: 'Completed',
+  resolved: 'Resolved',
   pending: 'Pending',
+  pending_verification: 'Pending Verification',
   overdue: 'Overdue',
   rejected: 'Rejected',
+  failed: 'Failed',
+  cancelled: 'Cancelled',
   upcoming: 'Upcoming',
   processing: 'Processing',
   partially_paid: 'Partially Paid',
@@ -62,9 +91,10 @@ export function Badge({ className, variant = 'default', children, ...props }) {
 }
 
 export function StatusBadge({ status = 'default', showDot = true, className }) {
-  const variant = badgeVariants.variants.variant[status] ? status : 'default'
-  const dotColor = statusDotColors[variant] || statusDotColors.default
-  const label = statusLabels[variant] || status
+  const norm = String(status || 'default').toLowerCase()
+  const variant = statusVariants[norm] || 'default'
+  const dotColor = statusDotColors[norm] || statusDotColors.default
+  const label = statusLabels[norm] || status
 
   return (
     <span className={cn(badgeVariants({ variant }), className)}>

@@ -34,31 +34,38 @@ export function useAuth() {
   useEffect(() => {
     let mounted = true
 
+    // Check if demo preview mode is active
+    if (typeof document !== 'undefined' && document.cookie.includes('adashi_demo_session=true')) {
+      setUser({
+        id: 'demo-user-123',
+        email: 'organizer@adashicircle.ng',
+        app_metadata: { role: 'super_admin', is_super_admin: true },
+        user_metadata: { first_name: 'Adashi', last_name: 'Organizer' },
+      })
+      setProfile({
+        id: 'demo-profile-123',
+        user_id: 'demo-user-123',
+        first_name: 'Adashi',
+        last_name: 'Organizer',
+        phone_number: '+2348012345678',
+        is_super_admin: true,
+      })
+      setIsLoading(false)
+      return () => {
+        mounted = false
+      }
+    }
+
+    if (!supabase?.auth) {
+      setIsLoading(false)
+      return () => {
+        mounted = false
+      }
+    }
+
     // Check user with getUser()
     async function initUser() {
       try {
-        // Check if demo preview mode is active
-        if (typeof document !== 'undefined' && document.cookie.includes('adashi_demo_session=true')) {
-          if (mounted) {
-            setUser({
-              id: 'demo-user-123',
-              email: 'organizer@adashicircle.ng',
-              app_metadata: { role: 'super_admin', is_super_admin: true },
-              user_metadata: { first_name: 'Adashi', last_name: 'Organizer' },
-            })
-            setProfile({
-              id: 'demo-profile-123',
-              user_id: 'demo-user-123',
-              first_name: 'Adashi',
-              last_name: 'Organizer',
-              phone_number: '+2348012345678',
-              is_super_admin: true,
-            })
-            setIsLoading(false)
-            return
-          }
-        }
-
         const { data: { user: currentUser } } = await supabase.auth.getUser()
         if (mounted) {
           setUser(currentUser ?? null)
@@ -76,24 +83,33 @@ export function useAuth() {
     initUser()
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        const currentUser = session?.user ?? null
-        if (mounted) {
-          setUser(currentUser)
-          if (currentUser) {
-            await fetchProfile(currentUser.id)
-          } else {
-            setProfile(null)
+    let subscription
+    try {
+      const res = supabase.auth.onAuthStateChange(
+        async (_event, session) => {
+          if (typeof document !== 'undefined' && document.cookie.includes('adashi_demo_session=true')) {
+            return
           }
-          setIsLoading(false)
+          const currentUser = session?.user ?? null
+          if (mounted) {
+            setUser(currentUser)
+            if (currentUser) {
+              await fetchProfile(currentUser.id)
+            } else {
+              setProfile(null)
+            }
+            setIsLoading(false)
+          }
         }
-      }
-    )
+      )
+      subscription = res?.data?.subscription
+    } catch (err) {
+      console.error('Error attaching auth state change listener:', err)
+    }
 
     return () => {
       mounted = false
-      subscription?.unsubscribe()
+      subscription?.unsubscribe?.()
     }
   }, [supabase, fetchProfile])
 

@@ -44,26 +44,37 @@ export function useNotifications() {
 
   // Real-time subscription
   useEffect(() => {
-    if (!user) return
+    if (!user || user.id === 'demo-user-123') return
 
-    const channel = supabase
-      .channel(`notifications:user_id=eq.${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => {
-          fetchNotifications()
-        }
-      )
-      .subscribe()
+    let channel = null
+    try {
+      channel = supabase
+        .channel(`notifications:user_id=eq.${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            fetchNotifications()
+          }
+        )
+        .subscribe()
+    } catch (err) {
+      console.warn('Realtime notifications subscription skipped:', err)
+    }
 
     return () => {
-      supabase.removeChannel(channel)
+      if (channel) {
+        try {
+          supabase.removeChannel(channel)
+        } catch (e) {
+          // ignore cleanup error
+        }
+      }
     }
   }, [user, supabase, fetchNotifications])
 
