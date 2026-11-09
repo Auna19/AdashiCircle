@@ -1,0 +1,41 @@
+/**
+ * @file Server-side Supabase client (App Router)
+ * Uses @supabase/ssr createServerClient with Next.js cookie adapters.
+ */
+
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export async function createClient() {
+  const cookieStore = await cookies()
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      'Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.'
+    )
+  }
+
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll()
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options)
+          })
+        } catch {
+          // setAll is called from a Server Component where cookies cannot be mutated.
+          // The middleware handles session refresh.
+        }
+      },
+    },
+  })
+}
+
+export default createClient
+
