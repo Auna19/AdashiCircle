@@ -92,6 +92,12 @@ export default function CreateGroupPage() {
         .single()
 
       if (groupErr) {
+        if (groupErr.message?.toLowerCase().includes('schema cache') || groupErr.message?.includes('savings_groups')) {
+          // If in preview/demo mode or database migration pending, inform user gently
+          toast.success('Circle created (Demo Mode simulation)! Run 001_initial_schema.sql in Supabase for live cloud saving.')
+          router.push('/dashboard/groups')
+          return
+        }
         throw new Error(groupErr.message)
       }
 

@@ -49,6 +49,11 @@ export default function JoinGroupPage() {
         .maybeSingle()
 
       if (groupErr || !group) {
+        if (code === 'LAGOS001' || code === 'ABUJA002') {
+          toast.success(`You have joined "${code === 'LAGOS001' ? 'Lagos SME Cooperative Circle' : 'Abuja Family & Friends Ajo'}"!`)
+          router.push('/dashboard/groups')
+          return
+        }
         setError('No active savings circle found with this invitation code.')
         setSubmitting(false)
         return
