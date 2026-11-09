@@ -659,3 +659,22 @@ CREATE POLICY "Super admins can view all audit logs" ON public.audit_logs
 CREATE POLICY "Group admins can view group audit logs" ON public.audit_logs
   FOR SELECT USING (is_group_admin(group_id));
 
+-- ============================================================
+-- TABLE PERMISSIONS & POSTGREST SCHEMA CACHE RELOAD
+-- Exposes all public tables and routines to Supabase Data API
+-- Fixes: "Could not find table in the schema cache"
+-- ============================================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated, service_role;
+
+-- Automatically grant permissions on any tables created in the future
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON ROUTINES TO anon, authenticated, service_role;
+
+-- Force PostgREST to reload its schema cache immediately
+NOTIFY pgrst, 'reload schema';
+
+
